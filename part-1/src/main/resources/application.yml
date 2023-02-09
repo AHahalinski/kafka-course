@@ -1,0 +1,14 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    topic:
+      name: test_topic
+    replication:
+      factor: 1
+    partition:
+      number: 1
+
+    consumer:
+      group-id: group-listener-one
+      enableAutoCommit: false
+      autoCommitIntervalMs: 5000

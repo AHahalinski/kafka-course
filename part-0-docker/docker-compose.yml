@@ -1,0 +1,68 @@
+version: "3"
+services:
+  kafka1:
+    image: 'bitnami/kafka:3.3.2'
+    hostname: kafka1
+    container_name: kafka1
+    ports:
+      - '9094:9094'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092,EXTERNAL://127.0.0.1:9094
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=2Fnb3u3cQDqBlYzYS6V1aA
+  kafka2:
+    image: 'bitnami/kafka:3.3.2'
+    hostname: kafka2
+    container_name: kafka2
+    ports:
+      - '29094:29094'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,CONTROLLER://:9093,EXTERNAL://:29094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:29092,EXTERNAL://127.0.0.1:29094
+      - KAFKA_BROKER_ID=2
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=2Fnb3u3cQDqBlYzYS6V1aA
+  kafka3:
+    image: 'bitnami/kafka:3.3.2'
+    hostname: kafka3
+    container_name: kafka3
+    ports:
+      - '39094:39094'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:39092,CONTROLLER://:9093,EXTERNAL://:39094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:39092,EXTERNAL://127.0.0.1:39094
+      - KAFKA_BROKER_ID=3
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=2Fnb3u3cQDqBlYzYS6V1aA
+  init-kafka-topic:
+    image: 'bitnami/kafka:3.3.2'
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    entrypoint: [ '/bin/sh', '-c']
+    command: |
+      "
+      echo 'Creating kafka topics...'
+      kafka-topics.sh --bootstrap-server kafka1:9092,kafka2:29092,kafka3:39092 --topic test_topic --create --partitions 3 --replication-factor 2
+      
+      echo 'Topic was created:'
+      kafka-topics.sh --bootstrap-server kafka1:9092,kafka2:29092,kafka3:39092 --list
+      "

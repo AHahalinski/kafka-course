@@ -1,0 +1,22 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: taxi
+
+  kafka:
+    bootstrap-servers: localhost:9094,localhost:29094,localhost:39094
+    admin:
+      properties:
+        min-in-sync-replicas: 2
+    topic:
+      input: input_location
+      output: output_distance
+    replication:
+      factor: 2
+    partition:
+      number: 3
+
+    consumer:
+      group-id: group-listener-one
